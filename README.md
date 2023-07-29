@@ -1,6 +1,36 @@
 [![Tests](../../actions/workflows/tests-13-sprint.yml/badge.svg)](../../actions/workflows/tests-13-sprint.yml) [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
 # Проект Mesto фронтенд + бэкенд
 
+## Обзор
+
+* Функциональность и технологии проетка
+* Ссылка на проект в GitHub Pages
+
+
+## Функциональность проекта
+
+* В проекте реализован различный функционал, а именно:
++ Адаптивный интерфейс;
++ Открытие и закрытие модальных окон;
++ Модальное окно с увеличенной фотографией карточки;
++ Реализована структура сайта по методологии БЭМ;
++ Webpack;
++ Обмен данными через API;
++ Добавлена возможность Регистрации и Авторизации;
+
+## Стек технологий
+* В проекте использпользовались:
++ React hoocks;
++ Переадресация с помощью Navigate и Routes из react-router-dom;
++ Javascript и расширение jsx;
++ Webpack;
++ Babel;
++ NPM
+
+
+## Проект на GitHub Pages
+
+* [Место: Россия](https://evgeniihvatov.github.io/express-mesto-gha/)
 
 ## Директории
 
