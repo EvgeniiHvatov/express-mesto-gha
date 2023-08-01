@@ -28,9 +28,9 @@
 + NPM
 
 
-## Проект на GitHub Pages
+## Ссылка на проект
 
-* [Место: Россия](https://evgeniihvatov.github.io/express-mesto-gha/)
+* [Место: Россия](https://github.com/EvgeniiHvatov/express-mesto-gha)
 
 ## Директории
 
