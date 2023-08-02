@@ -1,6 +1,7 @@
 const Cards = require('../models/card');
 
 const SUCСESSFUL_REQUEST = 200;
+const SUCСESSFUL_CREATED = 201;
 const BAD_REQUEST = 400;
 const NOT_FOUND = 404;
 const SERVER_ERROR = 500;
@@ -16,7 +17,7 @@ module.exports.createCard = (req, res) => {
   const owner = req.user._id;
 
   Cards.create({ name, link, owner })
-    .then((card) => res.status(SUCСESSFUL_REQUEST).send(card))
+    .then((card) => res.status(SUCСESSFUL_CREATED).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные при создании карточки -- ${err.name}` });

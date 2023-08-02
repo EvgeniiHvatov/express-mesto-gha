@@ -1,6 +1,7 @@
 const User = require('../models/user');
 
 const SUCСESSFUL_REQUEST = 200;
+const SUCСESSFUL_CREATED = 201;
 const BAD_REQUEST = 400;
 const NOT_FOUND = 404;
 const SERVER_ERROR = 500;
@@ -32,7 +33,7 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
-    .then((user) => res.status(SUCСESSFUL_REQUEST).send(user))
+    .then((user) => res.status(SUCСESSFUL_CREATED).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные при создании пользователя -- ${err.name}` });
