@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     required: false,
-    default: 'https://avatars.mds.yandex.net/i?id=7655fc443e8f8668ee0259f2f9ad7c11-5524434-images-thumbs&ref=rim&n=33&w=282&h=188',
+    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
   email: {
     type: String,
