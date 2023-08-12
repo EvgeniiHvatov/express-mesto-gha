@@ -18,17 +18,13 @@ module.exports.getAllUsers = (req, res, next) => {
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
-    .orFail(() => {
-      throw new NotFoundError('Пользователь не найден');
-    })
-    .then((user) => res.status(200).send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Переданы некорректные данные');
-      } else if (err.message === 'NotFound') {
-        throw new NotFoundError('Пользлователь не найден');
+  User
+    .findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        return next(new NotFoundError('Пользователь по указанному _id не найден'));
       }
+      return res.send({ user });
     })
     .catch(next);
 };
@@ -126,7 +122,7 @@ module.exports.updateAvatar = (req, res, next) => {
     { new: true, runValidators: true },
   ).then((user) => {
     if (!user) {
-      throw new NotFoundError('Пользователь по указанному _id не найден');
+      return next(new NotFoundError('Пользователь по указанному _id не найден'));
     }
     return res.send({ user });
   })
