@@ -10,13 +10,10 @@ const validateUrl = (url) => {
   throw new BadRequestError('Невалидный URL');
 };
 
-const isRegex = (avatar) => {
-  // eslint-disable-next-line no-useless-escape
+const idValidation = (id) => {
   const regex = /^[0-9a-fA-F]{24}$/;
-  if (regex.test(avatar)) {
-    return avatar;
-  }
-  throw new BadRequestError('Невалидный URL, не соответствует regex');
+  if (regex.test(id)) return id;
+  throw new BadRequestError('Неправильный id');
 };
 
 const validateSignUp = celebrate({
@@ -38,7 +35,7 @@ const validateSignIn = celebrate({
 
 const validateUserId = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().required().custom(isRegex),
+    userId: Joi.string().required().custom(idValidation),
   }),
 });
 
@@ -65,7 +62,7 @@ const validateCardCreation = celebrate({
 
 const validateCardId = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().required().custom(isRegex),
+    cardId: Joi.string().required().custom(idValidation),
   }),
 });
 

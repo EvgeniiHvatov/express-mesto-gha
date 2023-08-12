@@ -12,14 +12,6 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '64c930767e860899bafc68f4',
-//   };
-
-//   next();
-// });
-
 app.post('/signup', validateSignUp, createUser);
 app.post('/signin', validateSignIn, login);
 app.use(auth);
