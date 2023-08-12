@@ -1,12 +1,9 @@
 const { celebrate, Joi } = require('celebrate');
-const validator = require('validator');
+const isUrl = require('validator/lib/isURL');
 const BadRequestError = require('../errors/BadRequestError');
 
 const validateUrl = (url) => {
-  const result = validator.isURL(url);
-  if (result) {
-    return url;
-  }
+  if (isUrl(url)) return url;
   throw new BadRequestError('Невалидный URL');
 };
 
@@ -48,7 +45,6 @@ const validateUpdateProfile = celebrate({
 
 const validateUpdateAvatar = celebrate({
   body: Joi.object().keys({
-    // eslint-disable-next-line no-useless-escape
     avatar: Joi.string().required().custom(validateUrl),
   }),
 });

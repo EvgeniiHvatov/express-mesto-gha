@@ -8,6 +8,7 @@ module.exports = (req, res, next) => {
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return next(new AuthError('Требуется авторизация'));
   }
+
   const token = authorization.replace('Bearer ', '');
 
   try {
@@ -15,6 +16,7 @@ module.exports = (req, res, next) => {
   } catch (err) {
     return next(new AuthError('Требуется авторизация'));
   }
+
   req.user = payload;
   return next();
 };
