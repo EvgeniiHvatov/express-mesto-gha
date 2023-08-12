@@ -89,7 +89,7 @@ module.exports.login = (req, res, next) => {
         httpOnly: true,
         sameSite: true,
       });
-      res.status(200).send({ token, message: 'Регистрация прошла успешно!' });
+      res.send({ token, message: 'Регистрация прошла успешно!' });
     })
     .catch(next);
 };
