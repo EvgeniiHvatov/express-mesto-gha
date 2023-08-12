@@ -1,11 +1,11 @@
-const Cards = require('../models/card');
+const Card = require('../models/card');
 
 const BadRequestError = require('../errors/BadRequestError');
 const ForbiddenError = require('../errors/ForbiddenError');
 const NotFoundError = require('../errors/NotFoundError');
 
 module.exports.getAllCards = (req, res, next) => {
-  Cards.find({})
+  Card.find({})
     .then((cards) => res.status(200).send(cards))
     .catch(next);
 };
@@ -14,7 +14,7 @@ module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
-  Cards.create({ name, link, owner })
+  Card.create({ name, link, owner })
     .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -28,24 +28,28 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCardById = (req, res, next) => {
   const { cardId } = req.params;
 
-  Cards.findById(cardId)
-    .orFail(() => {
-      throw new NotFoundError('Карточка с указанным _id не найдена');
-    })
+  Card
+    .findById(cardId)
     .then((card) => {
-      if (card.owner.toString() === req.user_id) {
-        Cards
-          .findByIdAndRemove(cardId)
-          .then(() => res.status(200).send(card));
-      } else {
-        throw new ForbiddenError('Попытка удалить чужую карточку');
+      if (!card) {
+        return next(new NotFoundError('Карточка с указанным _id не найдена'));
       }
+      if (!card.owner.equals(req.user._id)) {
+        return next(new ForbiddenError('Попытка удалить чужую карточку'));
+      }
+      return card.remove().then(() => res.send({ message: 'Карточка успешно удалена' }));
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
-  Cards.findByIdAndUpdate(
+  Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
@@ -65,7 +69,7 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  Cards.findByIdAndUpdate(
+  Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
