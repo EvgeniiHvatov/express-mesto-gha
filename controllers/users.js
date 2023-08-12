@@ -122,14 +122,17 @@ module.exports.updateAvatar = (req, res, next) => {
     req.user._id,
     { avatar },
     { new: true, runValidators: true },
-  ).orFail(() => {
-    throw new NotFoundError('Пользователь с указанным id не найден');
+  ).then((user) => {
+    if (!user) {
+      return next(new NotFoundError('Пользователь по указанному _id не найден'));
+    }
+    return res.send({ user });
   })
-    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         throw new BadRequestError(`Переданы некорректные данные при обновлении аватара -- ${err.name}`);
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
