@@ -1,31 +1,38 @@
 const { celebrate, Joi } = require('celebrate');
 const validator = require('validator');
+const BadRequestError = require('../errors/BadRequestError');
 
-const isUrl = (link) => {
-  const result = validator.isURL(link);
+const validateUrl = (url) => {
+  const result = validator.isURL(url);
   if (result) {
-    return link;
+    return url;
   }
-  throw new Error('Невалидный URL');
+  throw new BadRequestError('Невалидный URL');
 };
 
-const validateSignup = celebrate({
+const isRegex = (avatar) => {
+  // eslint-disable-next-line no-useless-escape
+  const regex = /^http(s)?:\/\/(www\.)?([\w\-]+)?(\.[\w]+)(\/)?([\/\w\-.+[\]()_~:\/%?#@!$&'*,;=]*)$/;
+  if (regex) {
+    return avatar;
+  }
+  throw new Error('Невалидный URL, не соответствует regex');
+};
+
+const validateSignUp = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().regex(
-      // eslint-disable-next-line no-useless-escape
-      /[-a-zA-Z0-9@:%_\+.~#?&\/=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&\/=]*)?/gi,
-    ),
+    avatar: Joi.string().regex(isRegex),
   }),
 });
 
 const validateSignIn = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+    password: Joi.string().required(),
   }),
 });
 
@@ -35,24 +42,24 @@ const validateUserId = celebrate({
   }),
 });
 
-const validateProfileUpdate = celebrate({
+const validateUpdateProfile = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
   }),
 });
 
-const validateAvatarUpdate = celebrate({
+const validateUpdateAvatar = celebrate({
   body: Joi.object().keys({
     // eslint-disable-next-line no-useless-escape
-    avatar: Joi.string().required().regex(/[-a-zA-Z0-9@:%_\+.~#?&\/=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&\/=]*)?/gi),
+    avatar: Joi.string().required().regex(isRegex),
   }),
 });
 
 const validateCardCreation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().custom(isUrl),
+    link: Joi.string().required().custom(validateUrl),
   }),
 });
 
@@ -63,11 +70,11 @@ const validateCardId = celebrate({
 });
 
 module.exports = {
-  validateSignup,
+  validateSignUp,
   validateSignIn,
   validateUserId,
-  validateProfileUpdate,
-  validateAvatarUpdate,
+  validateUpdateProfile,
+  validateUpdateAvatar,
   validateCardCreation,
   validateCardId,
 };
