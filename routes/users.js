@@ -1,32 +1,29 @@
-const router = require('express').Router();
+const express = require('express');
 
+const router = express.Router();
 const {
   getAllUsers,
   getCurrentUser,
   getUserById,
-  // createUser,
+  createUser,
   updateProfile,
   updateAvatar,
+  login,
 } = require('../controllers/users');
 
 const {
   validateUserId,
   validateUpdateProfile,
   validateUpdateAvatar,
+  validateSignUp,
+  validateSignIn,
 } = require('../middlewares/validators');
 
 router.get('/users', getAllUsers);
 router.get('/users/me', getCurrentUser);
 router.get('/users/:userId', validateUserId, getUserById);
-// router.post('/users', celebrate({
-//   body: Joi.object().keys({
-//     name: Joi.string().min(2).max(30),
-//     about: Joi.string().min(2).max(30),
-//     avatar: Joi.string(),
-//     email: Joi.string().required(),
-//     password: Joi.string().required().min(8),
-//   }).unknown(true),
-// }), createUser);
+router.post('/signup', validateSignUp, createUser);
+router.post('/signin', validateSignIn, login);
 
 router.patch('/users/me', validateUpdateProfile, updateProfile);
 router.patch('/users/me/avatar', validateUpdateAvatar, updateAvatar);
