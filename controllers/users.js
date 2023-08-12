@@ -1,37 +1,50 @@
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const AuthError = require('../errors/AuthError');
+const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
+const NotFoundError = require('../errors/NotFoundError');
+const ServerError = require('../errors/ServerError');
 
-const SUCСESSFUL_REQUEST = 200;
-const SUCСESSFUL_CREATED = 201;
-const BAD_REQUEST = 400;
-const NOT_FOUND = 404;
-const SERVER_ERROR = 500;
-
-module.exports.getAllUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(SUCСESSFUL_REQUEST).send(users))
-    .catch(() => res.status(SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' }));
+module.exports.getAllUsers = (req, res, next) => {
+  User
+    .find({})
+    .then((users) => {
+      if (!users) {
+        throw new ServerError('Ошибка по умолчанию.');
+      }
+      res.status(200).send(users);
+    })
+    .catch(next);
 };
 
-module.exports.getUserById = (req, res) => {
+// module.exports.getCurrentUser = (req, res) => {
+//   const { } = req.params;
+// };
+
+module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
 
-  User.findById(userId)
-    .orFail(() => new Error('NotFound'))
-    .then((user) => res.status(SUCСESSFUL_REQUEST).send(user))
+  User
+    .findById(userId)
+    .orFail(() => {
+      throw new NotFoundError('Пользователь по указанному _id не найден');
+    })
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные при создании пользователя -- ${err.name}` });
+        next(new BadRequestError(`Переданы некорректные данные при создании пользователя -- ${err.name}`));
       } else if (err.message === 'NotFound') {
-        res.status(NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
+        next(new NotFoundError('Пользователь по указанному id не найден'));
       } else {
-        res.status(SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
+        next(new ServerError('Ошибка по умолчанию.'));
       }
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -42,54 +55,74 @@ module.exports.createUser = (req, res) => {
     }))
     .then((user) => {
       if (validator.isEmail(email)) {
-        res.status(SUCСESSFUL_CREATED).send(user);
+        res.status(201).send(user);
       }
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные при создании пользователя -- ${err.name}` });
+        next(new BadRequestError(`Переданы некорректные данные при создании пользователя -- ${err.name}`));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Пользователь с таким email уже зарегистрирован'));
       } else {
-        res.status(SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
+        next(new ServerError('Ошибка по умолчанию.'));
       }
     });
 };
 
-module.exports.updateProfile = (req, res) => {
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res.send({ token });
+      res.status(200).send({ message: 'Регистрация прошла успешно!' });
+    })
+    .catch(() => {
+      next(new AuthError('Требуется авторизация'));
+    });
+};
+
+module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
     { new: true, runValidators: true },
-  ).orFail(() => new Error('NotFound'))
-    .then((user) => res.status(SUCСESSFUL_REQUEST).send(user))
+  ).orFail(() => {
+    throw new NotFoundError('Пользователь по указанному id не найден');
+  })
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные при обновлении профиля -- ${err.name}` });
+        next(new BadRequestError(`Переданы некорректные данные при обновлении профиля -- ${err.name}`));
       } else if (err.message === 'NotFound') {
-        res.status(NOT_FOUND).send({ message: 'Пользователь с указанным id не найден' });
+        next(new NotFoundError('Пользователь с указанным id не найден'));
       } else {
-        res.status(SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
+        next(new ServerError('Ошибка по умолчанию.'));
       }
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
     req.user._id,
     { avatar },
     { new: true, runValidators: true },
-  ).orFail(() => new Error('NotFound'))
-    .then((user) => res.status(SUCСESSFUL_REQUEST).send(user))
+  ).orFail(() => {
+    throw new NotFoundError('Пользователь с указанным id не найден');
+  })
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные при обновлении аватара -- ${err.name}` });
+        next(new BadRequestError(`Переданы некорректные данные при обновлении аватара -- ${err.name}`));
       } else if (err.message === 'NotFound') {
-        res.status(NOT_FOUND).send({ message: 'Пользователь с указанным id не найден' });
+        next(new NotFoundError('Пользователь с указанным id не найден'));
       } else {
-        res.status(SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
+        next(new ServerError('Ошибка по умолчанию.'));
       }
     });
 };

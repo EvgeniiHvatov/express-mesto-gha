@@ -1,9 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { errors } = require('celebrate');
 const routesUsers = require('./routes/users');
 const routesCards = require('./routes/cards');
-
-const NOT_FOUND = 404;
+const { createUser, login } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -11,19 +13,32 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64c930767e860899bafc68f4',
-  };
+// app.use((req, res, next) => {
+//   req.user = {
+//     _id: '64c930767e860899bafc68f4',
+//   };
 
-  next();
-});
+//   next();
+// });
+
+app.post('/signup', createUser);
+app.post('/signin', login);
+app.use(auth);
+app.use('/cards', require('./routes/cards'));
 
 app.use(routesUsers);
 app.use(routesCards);
 
-app.use((req, res) => {
-  res.status(NOT_FOUND).send({ message: 'Запрашиваемый ресурс не найден' });
+app.use(() => {
+  throw new NotFoundError('Запрашиваемый ресурс не найден');
+});
+app.use(errors());
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res.status(statusCode).send({
+    message: statusCode === 500 ? 'Ошибка по умолчанию.' : message,
+  });
+  next();
 });
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
