@@ -16,7 +16,7 @@ const isRegex = (avatar) => {
   if (regex.test(avatar)) {
     return avatar;
   }
-  throw new Error('Невалидный URL, не соответствует regex');
+  throw new BadRequestError('Невалидный URL, не соответствует regex');
 };
 
 const validateSignUp = celebrate({

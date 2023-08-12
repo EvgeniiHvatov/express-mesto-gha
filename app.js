@@ -1,11 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
-const routesUsers = require('./routes/users');
-const routesCards = require('./routes/cards');
+const router = require('./routes/router');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const NotFoundError = require('./errors/NotFoundError');
 const { validateSignUp, validateSignIn } = require('./middlewares/validators');
 
 const { PORT = 3000 } = process.env;
@@ -25,14 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/signup', validateSignUp, createUser);
 app.post('/signin', validateSignIn, login);
 app.use(auth);
-app.use('/cards', require('./routes/cards'));
+app.use(router);
 
-app.use(routesUsers);
-app.use(routesCards);
-
-app.use(() => {
-  throw new NotFoundError('Запрашиваемый ресурс не найден');
-});
 app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
