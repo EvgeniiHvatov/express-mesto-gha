@@ -38,32 +38,31 @@ module.exports.getUserById = (req, res, next) => {
 
   User
     .findById(userId)
-    .orFail(() => {
-      throw new NotFoundError('Пользователь по указанному _id не найден');
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному _id не найден');
+      }
+      res.status(200).send(user);
     })
-    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError(`Переданы некорректные данные при создании пользователя -- ${err.name}`));
-      } else if (err.message === 'NotFound') {
-        next(new NotFoundError('Пользователь по указанному _id не найден'));
-      } else {
-        next(err);
+        return next(new BadRequestError(`Переданы некорректные данные при создании пользователя -- ${err.name}`));
       }
+      return next(err);
     });
 };
 
 module.exports.createUser = (req, res, next) => {
   const {
-    name, about, avatar, email,
+    name, about, avatar, email, password,
   } = req.body;
 
-  bcrypt.hash(req.body.password, 10)
+  bcrypt.hash(password, 10)
     .then((hash) => {
       User.create({
         name, about, avatar, email, password: hash,
       })
-        .then((user) => res.send({
+        .then((user) => res.status(201).send({
           name: user.name,
           about: user.about,
           avatar: user.avatar,

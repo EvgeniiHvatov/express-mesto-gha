@@ -1,8 +1,6 @@
 const { celebrate, Joi } = require('celebrate');
 const validator = require('validator');
 const BadRequestError = require('../errors/BadRequestError');
-// eslint-disable-next-line no-useless-escape
-const regex = /^http(s)?:\/\/(www\.)?([\w\-]+)?(\.[\w]+)(\/)?([\/\w\-.+[\]()_~:\/%?#@!$&'*,;=]*)$/;
 
 const validateUrl = (url) => {
   const result = validator.isURL(url);
@@ -12,20 +10,20 @@ const validateUrl = (url) => {
   throw new BadRequestError('Невалидный URL');
 };
 
-// const isRegex = (avatar) => {
-//   // eslint-disable-next-line no-useless-escape
-// const regex = /^http(s)?:\/\/(www\.)?([\w\-]+)?(\.[
-//   if (regex) {
-//     return avatar;
-//   }
-//   throw new Error('Невалидный URL, не соответствует regex');
-// };
+const isRegex = (avatar) => {
+  // eslint-disable-next-line no-useless-escape
+  const regex = /^[0-9a-fA-F]{24}$/;
+  if (regex.test(avatar)) {
+    return avatar;
+  }
+  throw new Error('Невалидный URL, не соответствует regex');
+};
 
 const validateSignUp = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(regex),
+    avatar: Joi.string().custom(validateUrl),
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
   }),
@@ -40,21 +38,21 @@ const validateSignIn = celebrate({
 
 const validateUserId = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().hex().length(24),
+    userId: Joi.string().required().custom(isRegex),
   }),
 });
 
 const validateUpdateProfile = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
   }),
 });
 
 const validateUpdateAvatar = celebrate({
   body: Joi.object().keys({
     // eslint-disable-next-line no-useless-escape
-    avatar: Joi.string().required().pattern(regex),
+    avatar: Joi.string().required().custom(validateUrl),
   }),
 });
 
@@ -67,7 +65,7 @@ const validateCardCreation = celebrate({
 
 const validateCardId = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24),
+    cardId: Joi.string().required().custom(isRegex),
   }),
 });
 
