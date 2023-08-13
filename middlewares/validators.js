@@ -7,6 +7,12 @@ const validateUrl = (url) => {
   throw new BadRequestError('Невалидный URL');
 };
 
+const idValidation = (id) => {
+  const regex = /^[0-9a-fA-F]{24}$/;
+  if (regex.test(id)) return id;
+  throw new BadRequestError('Невалидный id');
+};
+
 const validateSignUp = celebrate({
   body: Joi.object()
     .keys({
@@ -37,12 +43,66 @@ const validateSignIn = celebrate({
     }),
 });
 
+const validateUserId = celebrate({
+  params: Joi.object()
+    .keys({
+      userId: Joi.string()
+        .required()
+        .custom(idValidation),
+    }),
+});
+
+const validateUpdateProfile = celebrate({
+  body: Joi.object()
+    .keys({
+      name: Joi.string()
+        .min(2)
+        .max(30)
+        .required(),
+      about: Joi.string()
+        .min(2)
+        .max(30)
+        .required(),
+    }),
+});
+
+const validateUpdateAvatar = celebrate({
+  body: Joi.object()
+    .keys({
+      avatar: Joi.string()
+        .required()
+        .custom(validateUrl),
+    }),
+});
+
+const validateCardId = celebrate({
+  params: Joi.object()
+    .keys({
+      cardId: Joi.string()
+        .required()
+        .custom(idValidation),
+    }),
+});
+
+const validateCardCreation = celebrate({
+  body: Joi.object()
+    .keys({
+      name: Joi.string()
+        .min(2)
+        .max(30)
+        .required(),
+      link: Joi.string()
+        .required()
+        .custom(validateUrl),
+    }),
+});
+
 module.exports = {
-  // validateUserId,
+  validateUserId,
   validateSignUp,
   validateSignIn,
-  // validateUpdateProfile,
-  // validateUpdateAvatar,
-  // validateCardCreation,
-  // validateCardId,
+  validateUpdateProfile,
+  validateUpdateAvatar,
+  validateCardCreation,
+  validateCardId,
 };
