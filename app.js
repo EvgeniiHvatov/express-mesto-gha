@@ -26,16 +26,7 @@ app.post('/signin', validateSignIn, login);
 app.use(auth);
 app.use(router);
 app.use(errors());
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '64c930767e860899bafc68f4',
-//   };
 
-//   next();
-// });
-
-// app.use(routesUsers);
-// app.use(routesCards);
 app.use((err, req, res, next) => {
   const {
     status = 500,
