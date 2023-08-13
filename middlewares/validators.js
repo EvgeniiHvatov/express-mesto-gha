@@ -26,10 +26,21 @@ const validateSignUp = celebrate({
     }),
 });
 
+const validateSignIn = celebrate({
+  body: Joi.object()
+    .keys({
+      email: Joi.string()
+        .required()
+        .email(),
+      password: Joi.string()
+        .required(),
+    }),
+});
+
 module.exports = {
   // validateUserId,
   validateSignUp,
-  // validateSignIn,
+  validateSignIn,
   // validateUpdateProfile,
   // validateUpdateAvatar,
   // validateCardCreation,

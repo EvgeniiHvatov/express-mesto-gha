@@ -5,12 +5,13 @@ const router = require('./routes/router');
 // const routesUsers = require('./routes/users');
 // const routesCards = require('./routes/cards');
 const {
-  validateSignUp,
+  validateSignUp, validateSignIn,
 } = require('./middlewares/validators');
 const {
   createUser,
-  // login,
+  login,
 } = require('./controllers/users');
+const auth = require('./middlewares/auth');
 
 const NOT_FOUND = 404;
 
@@ -21,6 +22,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.post('/signup', validateSignUp, createUser);
+app.post('/signin', validateSignIn, login);
+app.use(auth);
 app.use(router);
 app.use(errors());
 // app.use((req, res, next) => {
