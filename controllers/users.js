@@ -5,12 +5,6 @@ const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
 const NotFoundError = require('../errors/NotFoundError');
 
-// const SUCСESSFUL_REQUEST = 200;
-// const SUCСESSFUL_CREATED = 201;
-// const BAD_REQUEST = 400;
-// const NOT_FOUND = 404;
-// const SERVER_ERROR = 500;
-
 module.exports.getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))

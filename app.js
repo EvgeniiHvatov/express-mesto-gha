@@ -2,8 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const router = require('./routes/router');
-// const routesUsers = require('./routes/users');
-// const routesCards = require('./routes/cards');
+
 const {
   validateSignUp, validateSignIn,
 } = require('./middlewares/validators');
@@ -12,8 +11,6 @@ const {
   login,
 } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-
-// const NOT_FOUND = 404;
 
 const { PORT = 3000 } = process.env;
 const app = express();
