@@ -6,17 +6,15 @@ const AuthError = require('../errors/AuthError');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
     minlength: 2,
     maxlength: 30,
-    // default: 'Жак-Ив Кусто',
+    default: 'Жак-Ив Кусто',
   },
   about: {
     type: String,
-    required: true,
     minlength: 2,
     maxlength: 30,
-    // default: 'Исследователь',
+    default: 'Исследователь',
   },
   avatar: {
     type: String,
