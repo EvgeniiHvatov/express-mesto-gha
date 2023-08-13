@@ -1,4 +1,8 @@
+// const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
+const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
 
 const SUCСESSFUL_REQUEST = 200;
 const SUCСESSFUL_CREATED = 201;
@@ -29,17 +33,30 @@ module.exports.getUserById = (req, res) => {
     });
 };
 
-module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-
-  User.create({ name, about, avatar })
-    .then((user) => res.status(SUCСESSFUL_CREATED).send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
-        res.status(BAD_REQUEST).send({ message: `Переданы некорректные данные при создании пользователя -- ${err.name}` });
-      } else {
-        res.status(SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
-      }
+module.exports.createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User
+        .create({
+          name,
+          about,
+          avatar,
+          email,
+          password: hash,
+        })
+        .then((user) => res.status(SUCСESSFUL_CREATED).send(user))
+        .catch((err) => {
+          if (err.name === 'ValidationError' || err.name === 'CastError') {
+            next(new BadRequestError(`Переданы некорректные данные при создании пользователя -- ${err.name}`));
+          } else if (err.code === 11000) {
+            next(new ConflictError('Пользователь с таким email уже зарегистрирован'));
+          } else {
+            next(err);
+          }
+        });
     });
 };
 
