@@ -5,15 +5,15 @@ const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
 const NotFoundError = require('../errors/NotFoundError');
 
-const SUCСESSFUL_REQUEST = 200;
-const SUCСESSFUL_CREATED = 201;
+// const SUCСESSFUL_REQUEST = 200;
+// const SUCСESSFUL_CREATED = 201;
 // const BAD_REQUEST = 400;
 // const NOT_FOUND = 404;
 // const SERVER_ERROR = 500;
 
 module.exports.getAllUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.status(SUCСESSFUL_REQUEST).send(users))
+    .then((users) => res.send(users))
     .catch(next);
 };
 
@@ -62,7 +62,17 @@ module.exports.createUser = (req, res, next) => {
           email,
           password: hash,
         })
-        .then((user) => res.status(SUCСESSFUL_CREATED).send(user))
+        .then(() => res.status(201)
+          .send(
+            {
+              user: {
+                name,
+                about,
+                avatar,
+                email,
+              },
+            },
+          ))
         .catch((err) => {
           if (err.name === 'ValidationError' || err.name === 'CastError') {
             next(new BadRequestError(`Переданы некорректные данные при создании пользователя -- ${err.name}`));
